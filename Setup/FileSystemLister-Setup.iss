@@ -6,6 +6,7 @@
 #define MyAppPublisher "Hämmer Electronics"
 #define MyAppURL "www.softwareload24.de.tl"
 #define MyAppExeName "FileSystemLister.exe"
+#define MyPath "F:\TODO\C# und VB\FileSystemLister"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -24,10 +25,10 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-LicenseFile=C:\Users\tim\Desktop\FileSystemLister\FileSystemLister\bin\Debug\License.txt
-OutputDir=C:\Users\tim\Desktop\FileSystemLister\Setup
+LicenseFile={#MyPath}\FileSystemLister\bin\Debug\License.txt
+OutputDir={#MyPath}\Setup
 OutputBaseFilename=FileSystemLister-Setup
-SetupIconFile=C:\Users\tim\Desktop\FileSystemLister\FileSystemLister\FileSystemLister.ico
+SetupIconFile={#MyPath}\FileSystemLister\FileSystemLister.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -40,10 +41,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "C:\Users\tim\Desktop\FileSystemLister\FileSystemLister\bin\Debug\FileSystemLister.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\tim\Desktop\FileSystemLister\FileSystemLister\bin\Debug\Languages.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\tim\Desktop\FileSystemLister\FileSystemLister\bin\Debug\License.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\tim\Desktop\FileSystemLister\FileSystemLister\bin\Debug\languages\*"; DestDir: "{app}\languages\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyPath}\FileSystemLister\bin\Debug\FileSystemLister.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyPath}\FileSystemLister\bin\Debug\Languages.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyPath}\FileSystemLister\bin\Debug\License.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyPath}\FileSystemLister\bin\Debug\languages\*"; DestDir: "{app}\languages\"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
