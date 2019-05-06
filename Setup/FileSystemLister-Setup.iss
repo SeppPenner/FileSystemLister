@@ -2,11 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "FileSystemLister"
-#define MyAppVersion "1.0.0.2"
+#define MyAppVersion "1.0.0.3"
 #define MyAppPublisher "Hämmer Electronics"
 #define MyAppURL "www.softwareload24.de.tl"
 #define MyAppExeName "FileSystemLister.exe"
-#define MyPath "F:\TODO\C# und VB\FileSystemLister"
+#define MyPath "C:\Users\tim\Desktop\Updaten_Snyk\FileSystemLister"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
