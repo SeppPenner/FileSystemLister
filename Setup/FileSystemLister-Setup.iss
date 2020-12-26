@@ -2,11 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "FileSystemLister"
-#define MyAppVersion "1.0.1.0"
+#define MyAppVersion "1.0.2.0"
 #define MyAppPublisher "Hämmer Electronics"
 #define MyAppURL "www.softwareload24.de.tl"
 #define MyAppExeName "FileSystemLister.exe"
-#define MyPath "C:\Users\Tim\Documents\Git\C# und VB\FileSystemLister"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -25,10 +24,10 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={commonpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-LicenseFile={#MyPath}\FileSystemLister\bin\Release\License.txt
-OutputDir={#MyPath}\Setup
+LicenseFile=..\src\FileSystemLister\bin\Release\License.txt
+OutputDir=..\Setup
 OutputBaseFilename=FileSystemLister-Setup
-SetupIconFile={#MyPath}\FileSystemLister\FileSystemLister.ico
+SetupIconFile=..\src\FileSystemLister\FileSystemLister.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -41,10 +40,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "{#MyPath}\FileSystemLister\bin\Release\FileSystemLister.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyPath}\FileSystemLister\bin\Release\Languages.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyPath}\FileSystemLister\bin\Release\License.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyPath}\FileSystemLister\bin\Release\languages\*"; DestDir: "{app}\languages\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\FileSystemLister.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\License.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\languages\*"; DestDir: "{app}\languages\"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
