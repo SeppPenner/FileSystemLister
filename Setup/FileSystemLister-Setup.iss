@@ -24,7 +24,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={commonpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
-LicenseFile=..\src\FileSystemLister\bin\Release\License.txt
+LicenseFile=..\src\FileSystemLister\License.txt
 OutputDir=..\Setup
 OutputBaseFilename=FileSystemLister-Setup
 SetupIconFile=..\src\FileSystemLister\FileSystemLister.ico
@@ -41,6 +41,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\FileSystemLister.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\FileSystemLister.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\Languages.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\FileSystemLister\bin\Release\net5.0-windows\languages\*"; DestDir: "{app}\languages\"; Flags: ignoreversion recursesubdirs createallsubdirs
