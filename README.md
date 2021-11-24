@@ -2,7 +2,6 @@ FileSystemLister
 ================
 
 FileSystemLister is a software to list all files in a selected folder and get an output text file of this data.
-The executable is written and tested in .Net 5.0.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/gnk9ghn90k7x8p38?svg=true)](https://ci.appveyor.com/project/SeppPenner/filesystemlister)
 [![GitHub issues](https://img.shields.io/github/issues/SeppPenner/FileSystemLister.svg)](https://github.com/SeppPenner/FileSystemLister/issues)
