@@ -43,7 +43,7 @@ namespace FileSystemLister
         /// <summary>
         /// The language.
         /// </summary>
-        private ILanguage language;
+        private ILanguage? language;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Main"/> class.
@@ -300,6 +300,11 @@ namespace FileSystemLister
         /// <param name="e">The event args.</param>
         private void EvaluateResult(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (this.language is null)
+            {
+                return;
+            }
+
             MessageBox.Show(this.language.GetWord("SearchCompletedText"), this.language.GetWord("SearchCompletedCaption"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.LockGui(false);
         }
@@ -374,6 +379,14 @@ namespace FileSystemLister
         /// <returns>The save file dialog.</returns>
         private SaveFileDialog GetSaveFileDialog()
         {
+            if (this.language is null)
+            {
+                return new SaveFileDialog
+                {
+                    Filter = string.Empty
+                };
+            }
+
             return new SaveFileDialog
             {
                 Filter = this.language.GetWord("Filter")
@@ -400,6 +413,11 @@ namespace FileSystemLister
                 return true;
             }
 
+            if (this.language is null)
+            {
+                return false;
+            }
+
             MessageBox.Show(this.language.GetWord("NoFolderSelectedText"), this.language.GetWord("NoFolderSelectedCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             return false;
         }
@@ -413,6 +431,11 @@ namespace FileSystemLister
             if (!string.IsNullOrWhiteSpace(this.richTextBoxSaveFile.Text))
             {
                 return true;
+            }
+
+            if (this.language is null)
+            {
+                return false;
             }
 
             MessageBox.Show(this.language.GetWord("NoFileSelectedText"), this.language.GetWord("NoFileSelectedCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
