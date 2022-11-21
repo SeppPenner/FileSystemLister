@@ -49,7 +49,7 @@ public partial class Main : Form
     private void InitializeLanguageManager()
     {
         this.languageManager.SetCurrentLanguage("de-DE");
-        this.languageManager.OnLanguageChanged += this.OnLanguageChanged;
+        this.languageManager.OnLanguageChanged += this.OnLanguageChanged!;
     }
 
     /// <summary>
@@ -120,8 +120,8 @@ public partial class Main : Form
     /// </summary>
     private void InitializeBackgroundWorker()
     {
-        this.backgroundWorker.DoWork += this.SearchDirectoryBackground;
-        this.backgroundWorker.RunWorkerCompleted += this.EvaluateResult;
+        this.backgroundWorker.DoWork += this.SearchDirectoryBackground!;
+        this.backgroundWorker.RunWorkerCompleted += this.EvaluateResult!;
     }
 
     /// <summary>
