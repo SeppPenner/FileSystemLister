@@ -9,9 +9,12 @@ then every line gets a `[*]` prefix and the whole list is wrapped in `[list]` an
 is bilingual (German, English) and switchable at runtime through a combo box. Distribution happens
 as an Inno Setup installer, not as a NuGet package.
 
-One solution `src/FileSystemLister.sln` with exactly one project,
-`src/FileSystemLister/FileSystemLister.csproj`. There is no test project, no example project and no
-second project of any kind.
+One solution `src/FileSystemLister.sln` with exactly two projects:
+
+- `src/FileSystemLister/FileSystemLister.csproj`, `OutputType` `WinExe`, the application.
+- `src/FileSystemLister.Tests/FileSystemLister.Tests.csproj`, MSTest, added in version 1.0.8.0.
+
+There is no example project and no third project of any kind.
 
 Layout inside `src/FileSystemLister`:
 
@@ -19,8 +22,12 @@ Layout inside `src/FileSystemLister`:
   `Application.SetCompatibleTextRenderingDefault(false)`, `Application.Run(new Main())`. This is
   the old style startup, not the `ApplicationConfiguration.Initialize()` one that newer templates
   generate.
-- `Main.cs`: the whole application logic. Folder dialog, save file dialog, the `BackgroundWorker`
-  that does the scan, the recursive enumeration, the result file and the language handling.
+- `Main.cs`: everything that touches the user interface. Folder dialog, save file dialog, the
+  `BackgroundWorker` that runs the scan, the language handling and the message boxes. It holds no
+  scan logic of its own any more.
+- `Services/FileSystemListerService.cs` plus `Services/IFileSystemListerService.cs`: the scan
+  itself. `ListFileNames` walks the folder and returns the finished lines, `WriteResultFile` writes
+  them. This is the part the tests cover, keep new scan logic here and not in the form.
 - `Main.Designer.cs` plus `Main.resx`: Windows Forms designer output. `Main.resx` is about 250 kB
   because the window icon is embedded in it. Designer code is generated, it does not follow the
   hand written conventions below, do not reformat it by hand.
@@ -31,6 +38,13 @@ Layout inside `src/FileSystemLister`:
 - `languages/de-DE.xml` and `languages/en-US.xml`: the UI texts, 11 keys per file.
 - `FileSystemLister.ico`: application and installer icon. `License.txt`: shipped next to the
   executable.
+
+Layout inside `src/FileSystemLister.Tests`:
+
+- `FileSystemListerServiceTests.cs`: the file names without their path, the recursion into
+  subdirectories, the order of directory and subdirectory, duplicate names, the bulletin code
+  wrapper and entries, the empty directory, a missing directory and the two result file cases.
+- `GlobalUsings.cs`: all usings of the test project.
 
 Translation comes from the NuGet package
 [HaemmerElectronics.SeppPenner.Language](https://www.nuget.org/packages/HaemmerElectronics.SeppPenner.Language/)
@@ -53,6 +67,10 @@ Its runtime contract is convention based and this project depends on it:
 dotnet build src/FileSystemLister.sln
 ```
 
+```powershell
+dotnet test src/FileSystemLister.sln
+```
+
 - Single target framework `net10.0-windows`, `WinExe`, `UseWindowsForms`, `RuntimeIdentifiers`
   `win-x64`. This is a Windows only application, unlike the library it references.
 - All build properties live directly in `src/FileSystemLister/FileSystemLister.csproj`. There is no
@@ -70,9 +88,15 @@ dotnet build src/FileSystemLister.sln
 - `Setup/build-setup-files.bat` deletes all `bin` and `obj` folders below `src`, then runs
   `dotnet publish -c Release -o bin/publish` and removes the `*.pdb` files from the publish output.
   The batch file does **not** run the Inno Setup compiler, that is a separate manual step.
-- **There are no tests in this repository.** Never claim a test run happened. Verification means a
-  clean build, and where behaviour changed, starting the built executable, pointing it at a folder
-  and comparing the written result file.
+- Tests are MSTest, in the single test project `src/FileSystemLister.Tests`, which follows the same
+  package set as the sibling repositories: `Microsoft.NET.Test.Sdk`, `MSTest.TestAdapter`,
+  `MSTest.TestFramework`, `coverlet.collector` and `GitVersion.MsBuild`. `dotnet test` runs 11
+  tests, they need no network and no fixture outside the repository. Each test creates its own
+  directory below `Path.GetTempPath()` and deletes it afterwards, so a test run leaves the working
+  tree untouched. Never claim a test run happened without running it.
+- The tests cover `FileSystemListerService` only. Everything in `Main.cs` needs the user interface
+  and is not covered, so a change there is verified by starting the built executable, pointing it
+  at a folder and comparing the written result file.
 
 ## Code conventions
 
@@ -93,20 +117,23 @@ Follow the surrounding code, it is consistent throughout the hand written files:
 - `src/.editorconfig` also enforces braces everywhere, no multiple blank lines, four spaces, CRLF,
   UTF-8, file scoped namespaces, `System` usings sorted first and `IDE0005` as warning. Analyzer
   warnings are fixed, not silenced.
-- `Main.cs` is deliberately split into small single purpose private methods (`Initialize`,
-  `InitializeCaption`, `SearchDirectory`, `SaveFileNames`, `SaveFileName`, ...). Keep new logic in
-  that shape instead of growing one big handler.
+- `Main.cs` and `FileSystemListerService.cs` are deliberately split into small single purpose
+  private methods (`Initialize`, `InitializeCaption`, `ShowError`, `AddFileNamesOfDirectory`,
+  `GetFileName`, ...). Keep new logic in that shape instead of growing one big handler.
 
 ## Known quirks
 
 Do not silently "clean up" these, they are existing behaviour:
 
-- **Only file names are written, never paths.** `SaveFileName` stores `Path.GetFileName(file)`, so
+- **Only file names are written, never paths.** `GetFileName` stores `Path.GetFileName(file)`, so
   two files with the same name in different folders produce two identical lines and the result file
   does not say where anything lives. That is what the program is for, it feeds forum posts.
-- **Errors during the scan are swallowed on purpose.** The loops in `SaveFileNames` and
-  `SearchDirectories` catch every exception per file and per directory and continue, which is what
-  makes a scan over a folder with locked or protected subfolders finish at all.
+- **Errors below the picked folder are swallowed on purpose.** `AddFileNamesOfSubDirectories`
+  catches every exception per subdirectory and continues, which is what makes a scan over a folder
+  with locked or protected subfolders finish at all. The folder the user picked is the exception,
+  it is read without a guard, so an unreadable one reaches the `BackgroundWorker` and is shown once
+  by `EvaluateResult`. Do not wrap that call, the old code did and produced one message box per
+  unreadable directory, from a background thread.
 - The button captions and the check box text are set **only** in the `OnLanguageChanged` handler,
   the designer assigns German literals that are never shown. `Initialize` therefore has a required
   order: `InitializeLanguageManager` subscribes to the event, and only the following

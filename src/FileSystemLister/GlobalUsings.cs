@@ -1,6 +1,7 @@
 #pragma warning disable IDE0065 // Die using-Anweisung wurde falsch platziert.
 global using System.ComponentModel;
 
+global using FileSystemLister.Services;
 global using FileSystemLister.UiThreadInvoke;
 
 global using Languages.Implementation;

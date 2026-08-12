@@ -15,9 +15,9 @@ namespace FileSystemLister;
 public partial class Main : Form
 {
     /// <summary>
-    /// The files.
+    /// The file system lister service.
     /// </summary>
-    private readonly List<string> files = new();
+    private readonly IFileSystemListerService fileSystemListerService = new FileSystemListerService();
 
     /// <summary>
     /// The language manager.
@@ -132,161 +132,18 @@ public partial class Main : Form
     private void SearchDirectoryBackground(object sender, DoWorkEventArgs e)
     {
         var directory = string.Empty;
-        var bulletinCode = false;
+        var resultFile = string.Empty;
+        var useBulletinCode = false;
 
         this.UiThreadInvoke(() =>
         {
             directory = this.richTextBoxFolder.Text;
-            bulletinCode = this.checkBoxBulletinCode.Checked;
+            resultFile = this.richTextBoxSaveFile.Text;
+            useBulletinCode = this.checkBoxBulletinCode.Checked;
         });
 
-        this.SearchAndWriteResult(directory, bulletinCode);
-    }
-
-    /// <summary>
-    /// Searches the directory and writes the result file.
-    /// </summary>
-    /// <param name="directory">The directory.</param>
-    /// <param name="bulletinCode">A value indicating whether the output should be formatted as bulletin code or not.</param>
-    private void SearchAndWriteResult(string directory, bool bulletinCode)
-    {
-        this.SearchDirectory(directory, bulletinCode);
-        this.WriteResultFile();
-    }
-
-    /// <summary>
-    /// Searches the directory.
-    /// </summary>
-    /// <param name="directory">The directory.</param>
-    /// <param name="bulletinCode">A value indicating whether the output should be formatted as bulletin code or not.</param>
-    private void SearchDirectory(string directory, bool bulletinCode)
-    {
-        try
-        {
-            this.SearchFilesAndDirectories(directory, bulletinCode);
-        }
-        catch (Exception ex)
-        {
-            this.ShowError(ex);
-        }
-    }
-
-    /// <summary>
-    /// Searches the files and the directory.
-    /// </summary>
-    /// <param name="directory">The directory.</param>
-    /// <param name="bulletinCode">A value indicating whether the output should be formatted as bulletin code or not.</param>
-    private void SearchFilesAndDirectories(string directory, bool bulletinCode)
-    {
-        this.SaveFileNames(directory, bulletinCode);
-        this.SearchDirectories(directory, bulletinCode);
-    }
-
-    /// <summary>
-    /// Saves the file names to the result file.
-    /// </summary>
-    /// <param name="directory">The directory.</param>
-    /// <param name="bulletinCode">A value indicating whether the output should be formatted as bulletin code or not.</param>
-    private void SaveFileNames(string directory, bool bulletinCode)
-    {
-        foreach (var file in Directory.EnumerateFiles(directory))
-        {
-            try
-            {
-                this.SaveFileName(file, bulletinCode);
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-    }
-
-    /// <summary>
-    /// Searches the directories.
-    /// </summary>
-    /// <param name="directory">The directory.</param>
-    /// <param name="bulletinCode">A value indicating whether the output should be formatted as bulletin code or not.</param>
-    private void SearchDirectories(string directory, bool bulletinCode)
-    {
-        foreach (var dir in Directory.EnumerateDirectories(directory))
-        {
-            try
-            {
-                this.SearchDirectory(dir, bulletinCode);
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
-    }
-
-    /// <summary>
-    /// Saves the file name.
-    /// </summary>
-    /// <param name="file">The file.</param>
-    /// <param name="bulletinCode">A value indicating whether the output should be formatted as bulletin code or not.</param>
-    private void SaveFileName(string file, bool bulletinCode)
-    {
-        if (bulletinCode)
-        {
-            this.files.Add("[*]" + Path.GetFileName(file));
-        }
-        else
-        {
-            this.files.Add(Path.GetFileName(file));
-        }
-    }
-
-    /// <summary>
-    /// Writes the result file.
-    /// </summary>
-    private void WriteResultFile()
-    {
-        try
-        {
-            this.CheckBbCodeAndWriteLines(this.GetResultDirectory());
-        }
-        catch (Exception ex)
-        {
-            this.ShowError(ex);
-        }
-    }
-
-    /// <summary>
-    /// Gets the result directory.
-    /// </summary>
-    /// <returns>The result directory.</returns>
-    private string GetResultDirectory()
-    {
-        var resultDirectory = string.Empty;
-        this.UiThreadInvoke(() => { resultDirectory = this.richTextBoxSaveFile.Text; });
-        return resultDirectory;
-    }
-
-    /// <summary>
-    /// Checks the bulletin code and writes the lines to a file.
-    /// </summary>
-    /// <param name="resultDirectory">The result directory.</param>
-    private void CheckBbCodeAndWriteLines(string resultDirectory)
-    {
-        this.CheckBbCodeForFile();
-        File.WriteAllLines(resultDirectory, this.files);
-    }
-
-    /// <summary>
-    /// Checks the bulletin code for a file.
-    /// </summary>
-    private void CheckBbCodeForFile()
-    {
-        if (!this.checkBoxBulletinCode.Checked)
-        {
-            return;
-        }
-
-        this.files.Insert(0, "[list]");
-        this.files.Add("[/list]");
+        var fileNames = this.fileSystemListerService.ListFileNames(directory, useBulletinCode);
+        this.fileSystemListerService.WriteResultFile(resultFile, fileNames);
     }
 
     /// <summary>
@@ -296,13 +153,15 @@ public partial class Main : Form
     /// <param name="e">The event args.</param>
     private void EvaluateResult(object sender, RunWorkerCompletedEventArgs e)
     {
-        if (this.language is null)
+        this.LockGui(false);
+
+        if (e.Error is not null)
         {
+            this.ShowError(e.Error);
             return;
         }
 
-        MessageBox.Show(this.language.GetWord("SearchCompletedText"), this.language.GetWord("SearchCompletedCaption"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-        this.LockGui(false);
+        MessageBox.Show(this.language?.GetWord("SearchCompletedText"), this.language?.GetWord("SearchCompletedCaption"), MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     /// <summary>
@@ -348,7 +207,6 @@ public partial class Main : Form
             return;
         }
 
-        this.files.Clear();
         this.LockGui(true);
         this.backgroundWorker.RunWorkerAsync();
     }
