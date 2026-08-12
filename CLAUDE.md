@@ -124,10 +124,10 @@ Do not silently "clean up" these, they are existing behaviour:
   Inno Setup script. The copy one level up is dead weight, but it is tracked history.
 - `.gitignore` excludes `*.exe` and `[Bb]in`, yet `Setup/FileSystemLister-Setup.exe` is tracked. It
   was added with `git add -f` and has to be updated the same way for every release.
-- `Setup/FileSystemLister-Setup.iss` is stored in the Windows-1252 codepage without a BOM, its only
-  non ASCII byte is the `0xE4` of `Hämmer Electronics`. Inno Setup 6 reads a script as UTF-8 only
-  when a BOM is there, so on a machine with a different system codepage the publisher name in the
-  installer breaks. Any editor that saves "UTF-8 without BOM" breaks it as well.
+- `Setup/FileSystemLister-Setup.iss` is UTF-8 **with** BOM and has to stay that way. Inno Setup 6
+  reads a script as UTF-8 only when the BOM is there, without it the file is interpreted in the
+  system ANSI codepage and `Hämmer Electronics` becomes `HÃ¤mmer Electronics` in the installer.
+  Editors that save "UTF-8 without BOM" by default silently break this.
 - `README.md` is spelled in capitals here, the sibling repositories use `Readme.md`. Links from the
   outside point at the capitalized name.
 - The form has `ClientSize` 713 x 201 but `MinimumSize` 674 x 240, so the window grows a little on

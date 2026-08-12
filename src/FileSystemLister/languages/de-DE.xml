@@ -47,5 +47,9 @@
 			<Key>Filter</Key>
 			<Value>Textdateien|*.txt|Alle Dateien|*.*</Value>
 		</Word>
+		<Word>
+			<Key>ErrorTitle</Key>
+			<Value>Fehler</Value>
+		</Word>
 	</Words>
 </Language>

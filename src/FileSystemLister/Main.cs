@@ -167,7 +167,7 @@ public partial class Main : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message + ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            this.ShowError(ex);
         }
     }
 
@@ -250,7 +250,7 @@ public partial class Main : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message + ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            this.ShowError(ex);
         }
     }
 
@@ -334,7 +334,7 @@ public partial class Main : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message + ex.StackTrace, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            this.ShowError(ex);
         }
     }
 
@@ -436,6 +436,17 @@ public partial class Main : Form
 
         MessageBox.Show(this.language.GetWord("NoFileSelectedText"), this.language.GetWord("NoFileSelectedCaption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
         return false;
+    }
+
+    /// <summary>
+    /// Shows an exception in an error message box.
+    /// </summary>
+    /// <param name="ex">The exception to show.</param>
+    private void ShowError(Exception ex)
+    {
+        var title = this.language?.GetWord("ErrorTitle");
+        var text = $"{ex.Message}{Environment.NewLine}{Environment.NewLine}{ex.StackTrace}";
+        MessageBox.Show(text, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 
     /// <summary>
