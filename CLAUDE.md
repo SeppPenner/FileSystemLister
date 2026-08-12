@@ -80,14 +80,16 @@ dotnet test src/FileSystemLister.sln
 - `NU1803` (HTTP source usage during restore) is the one warning suppressed via `NoWarn`. Fix
   warnings instead of extending that list. `NuGetAudit` and `NuGetAuditMode=all` are on, so a
   vulnerable transitive package fails the build too.
-- Versions come from GitVersion.MsBuild out of the git tags, for example `1.0.8-1` for the first
-  commit after tag `1.0.7`. Never edit a version property or an assembly version by hand.
+- Versions come from GitVersion.MsBuild out of the git tags, for example `1.0.9-1` for the first
+  commit after tag `1.0.8`. Never edit a version property or an assembly version by hand.
 - Restore needs nuget.org. If a private feed is configured globally on the machine and answers 404
   for public packages, restore fails with `NU1301`. Then build with an explicit source:
   `dotnet build src/FileSystemLister.sln --source https://api.nuget.org/v3/index.json`.
 - `Setup/build-setup-files.bat` deletes all `bin` and `obj` folders below `src`, then runs
-  `dotnet publish -c Release -o bin/publish` and removes the `*.pdb` files from the publish output.
-  The batch file does **not** run the Inno Setup compiler, that is a separate manual step.
+  `dotnet publish -c Release -r win-x64 --self-contained true -o bin/publish` and removes the
+  `*.pdb` files from the publish output. The installer ships the whole runtime, so the target
+  machine needs no .NET installation, at the price of roughly 120 MB of publish output. The batch
+  file does **not** run the Inno Setup compiler, that is a separate manual step.
 - Tests are MSTest, in the single test project `src/FileSystemLister.Tests`, which follows the same
   package set as the sibling repositories: `Microsoft.NET.Test.Sdk`, `MSTest.TestAdapter`,
   `MSTest.TestFramework`, `coverlet.collector` and `GitVersion.MsBuild`. `dotnet test` runs 11
@@ -144,7 +146,7 @@ Do not silently "clean up" these, they are existing behaviour:
   combo box, which is `de-DE.xml` only because of the alphabetical file order.
 - The window title is `Application.ProductName` plus `Application.ProductVersion`, and
   `ProductVersion` is the GitVersion informational version. On an untagged commit the title reads
-  something like `FileSystemLister 1.0.8-1+Branch.master.Sha.bd94620...`. Only a tagged build shows
+  something like `FileSystemLister 1.0.9-1+Branch.master.Sha.75f107b...`. Only a tagged build shows
   a clean version.
 - **The icon exists twice.** `src/FileSystemLister.ico` and `src/FileSystemLister/FileSystemLister.ico`
   are both tracked. Only the second one is used, by `ApplicationIcon` and by `SetupIconFile` in the
@@ -164,20 +166,20 @@ Do not silently "clean up" these, they are existing behaviour:
 
 The tag comes **before** the installer build, never after. GitVersion derives the assembly version
 from the tag, so an installer compiled on an untagged commit contains an executable that reports
-something like `1.0.8-4+Branch.master.Sha...` in its window title instead of a clean `1.0.8`.
+something like `1.0.9-4+Branch.master.Sha...` in its window title instead of a clean `1.0.9`.
 
 1. Make the change.
 2. Add an entry at the top of `Changelog.md` in the existing format:
-   `* **Version 1.0.8.0 (2026-08-11)** : Short description.`
+   `* **Version 1.0.9.0 (2026-08-12)** : Short description.`
 3. Bump `MyAppVersion` in `Setup/FileSystemLister-Setup.iss` to the same version, four parts.
-4. Commit that, then tag the commit with the plain version number, no `v` prefix (`1.0.7`,
-   `1.0.6`, ...). The existing tags are lightweight tags, create new ones the same way.
+4. Commit that, then tag the commit with the plain version number, no `v` prefix (`1.0.8`,
+   `1.0.7`, ...). The existing tags are lightweight tags, create new ones the same way.
 5. Run `Setup/build-setup-files.bat`, it publishes the tagged commit to
    `src/FileSystemLister/bin/publish`.
 6. Compile `Setup/FileSystemLister-Setup.iss` with Inno Setup, it writes
    `Setup/FileSystemLister-Setup.exe`.
 7. Commit that file with `git add -f`, then push the commits and the tag. This last commit sits
-   after the tag, the same way `Updated setup.` sits after tag `1.0.7`.
+   after the tag, the same way `Updated setup.` sits after tag `1.0.8`.
 
 Never run the publish or the installer build unless explicitly asked to release.
 
