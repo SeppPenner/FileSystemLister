@@ -151,8 +151,9 @@ Do not silently "clean up" these, they are existing behaviour:
 - **The icon exists twice.** `src/FileSystemLister.ico` and `src/FileSystemLister/FileSystemLister.ico`
   are both tracked. Only the second one is used, by `ApplicationIcon` and by `SetupIconFile` in the
   Inno Setup script. The copy one level up is dead weight, but it is tracked history.
-- `.gitignore` excludes `*.exe` and `[Bb]in`, yet `Setup/FileSystemLister-Setup.exe` is tracked. It
-  was added with `git add -f` and has to be updated the same way for every release.
+- `.gitignore` excludes `*.exe` and `[Bb]in`, and `Setup/FileSystemLister-Setup.exe` is not tracked
+  any more. Up to and including 1.0.8 it was added with `git add -f` for every release, now it hangs
+  on the GitHub release of its version tag.
 - `Setup/FileSystemLister-Setup.iss` is UTF-8 **with** BOM and has to stay that way. Inno Setup 6
   reads a script as UTF-8 only when the BOM is there, without it the file is interpreted in the
   system ANSI codepage and `Hämmer Electronics` becomes `HÃ¤mmer Electronics` in the installer.
@@ -178,10 +179,27 @@ something like `1.0.9-4+Branch.master.Sha...` in its window title instead of a c
    `src/FileSystemLister/bin/publish`.
 6. Compile `Setup/FileSystemLister-Setup.iss` with Inno Setup, it writes
    `Setup/FileSystemLister-Setup.exe`.
-7. Commit that file with `git add -f`, then push the commits and the tag. This last commit sits
-   after the tag, the same way `Updated setup.` sits after tag `1.0.8`.
+7. Push the commits and the tag, then attach `Setup/FileSystemLister-Setup.exe` to the GitHub release
+   of that tag. **Never commit the installer**, `.gitignore` covers it and every committed copy stays
+   in the history for good.
 
 Never run the publish or the installer build unless explicitly asked to release.
+
+For step 7 there is no `gh` on this machine. The GitHub API does the job, with the token that
+`git push` already uses, so nothing has to be stored anywhere:
+
+```bash
+c=$(printf "protocol=https\nhost=github.com\n\n" | git credential fill)
+tok=$(printf "%s" "$c" | grep '^password=' | cut -d= -f2-)
+id=$(curl -s -X POST -H "Authorization: Bearer $tok" \
+  https://api.github.com/repos/SeppPenner/FileSystemLister/releases \
+  -d '{"tag_name":"1.0.9","name":"1.0.9"}' | grep -m1 '"id"' | tr -dc 0-9)
+curl -s -X POST -H "Authorization: Bearer $tok" -H "Content-Type: application/octet-stream" \
+  --data-binary @Setup/FileSystemLister-Setup.exe \
+  "https://uploads.github.com/repos/SeppPenner/FileSystemLister/releases/$id/assets?name=FileSystemLister-Setup.exe"
+```
+
+Never print that token, and never write it into a file.
 
 There is no CI configuration in this repository, no `.github` folder and no publish pipeline. The
 AppVeyor badge in `README.md` points to a build that is configured outside of the repository. There
